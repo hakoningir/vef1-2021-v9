@@ -1,7 +1,7 @@
 // TODO importa því sem nota þarf
 import { empty } from "./lib/helpers.js";
 import { fetchNews } from "./lib/news.js";
-import { fetchAndRenderCategory, fetchAndRenderLists } from "./lib/ui.js";
+import { fetchAndRenderCategory, fetchAndRenderLists, createCategoryBackLink } from "./lib/ui.js";
 
 /** Fjöldi frétta til að birta á forsíðu */
 const CATEGORY_ITEMS_ON_FRONTPAGE = 5;
@@ -17,17 +17,18 @@ const main = document.querySelector('main');
 function route() {
   // Athugum hvort það sé verið að biðja um category í URL, t.d.
   // /?category=menning
-  let url = window.location.search;
-  const param = new URLSearchParams(url);
-  const cat = (param.get("category"));
+  const stad = new URLSearchParams(window.location.search);
+  const nystad = stad.get('category');
+
+  if (nystad){
+    const backlink = createCategoryBackLink(main, CATEGORY_ITEMS_ON_FRONTPAGE);
+
+    fetchAndRenderCategory(nystad, main, backlink);
+  } else {
+    fetchAndRenderLists(main, CATEGORY_ITEMS_ON_FRONTPAGE);
+  }
   // Ef svo er, birtum fréttir fyrir þann flokk
 
-  if (cat){
-    console.log(cat)
-    console.log(fetchNews);
-    fetchAndRenderCategory(cat, main);
-  }
-  else fetchAndRenderLists(main, CATEGORY_ITEMS_ON_FRONTPAGE);
   // Annars birtum við „forsíðu“
 }
 
@@ -39,7 +40,6 @@ window.onpopstate = () => {
   // TODO útfæra
   empty(main);
   route();
-
 };
 
 // Í fyrsta skipti sem vefur er opnaður birtum við það sem beðið er um út frá URL
